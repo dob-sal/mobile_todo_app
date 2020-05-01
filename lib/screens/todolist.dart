@@ -3,6 +3,14 @@ import 'package:todo_app/model/todo.dart';
 import 'package:todo_app/screens/tododetail.dart';
 import 'package:todo_app/util/dbhelper.dart';
 
+final List<String> listTilePopupChoices = const <String>[
+  'Edit',
+  'Delete',
+];
+
+const mnuEdit = 'Edit';
+const mnuDelete = 'Delete';
+
 class TodoList extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => TodoListState();
@@ -24,7 +32,7 @@ class TodoListState extends State {
       body: todoListItems(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          navigateToDetail(Todo('', 3, '',''));
+          navigateToDetail(Todo('', 3, '', ''));
         },
         tooltip: "Add new Todo",
         child: Icon(Icons.add),
@@ -45,10 +53,21 @@ class TodoListState extends State {
                   child: Text(this.todos[position].priority.toString())),
               title: Text(this.todos[position].title),
               subtitle: Text(this.todos[position].description),
-              onTap: (){
+              trailing: PopupMenuButton<String>(
+                onSelected: (String choice) { select(choice, this.todos[position]); },
+                itemBuilder: (BuildContext context) {
+                  return listTilePopupChoices.map((String choice) {
+                    return PopupMenuItem<String>(
+                      value: choice,
+                      child: Text(choice),
+                    );
+                  }).toList();
+                },
+              ),
+              onTap: () {
                 debugPrint("Tapped on " + this.todos[position].id.toString());
                 navigateToDetail(this.todos[position]);
-              } ,
+              },
             ),
           );
         });
@@ -74,15 +93,15 @@ class TodoListState extends State {
     });
   }
 
-  Color getColor(int priority){
+  Color getColor(int priority) {
     switch (priority) {
       case 1:
         return Colors.red;
         break;
-        case 2:
+      case 2:
         return Colors.orange;
         break;
-        case 3:
+      case 3:
         return Colors.green;
         break;
       default:
@@ -91,12 +110,34 @@ class TodoListState extends State {
   }
 
   void navigateToDetail(Todo todo) async {
-    bool result = await Navigator.push(context, 
-        MaterialPageRoute(builder: (context) => TodoDetail(todo))
-    );
+    bool result = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => TodoDetail(todo)));
 
     if (result == true) {
       getData();
+    }
+  }
+
+   void select(String value, Todo todo) async {
+    int result;
+    switch (value) {
+      case mnuEdit:
+      navigateToDetail(todo);
+        break;
+      case mnuDelete:
+         if (todo.id == null) {
+          return;
+        }
+        result = await helper.deleteTodo(todo.id);
+        if (result != 0) {
+          getData();
+          AlertDialog alertDialog = AlertDialog(
+              title: Text("Delete Todo"),
+              content: Text("The Todo has been deleted!"));
+          showDialog(context: context, builder: (_) => alertDialog);
+        }
+        break;
+      default:
     }
   }
 }

@@ -4,7 +4,7 @@ import 'package:todo_app/model/todo.dart';
 import 'package:todo_app/util/dbhelper.dart';
 
 DbHelper helper = DbHelper();
-final List<String> choices = const <String>[
+final List<String> detailViewPopupChoices = const <String>[
   'Save Todo & Back',
   'Delete Todo',
   'Back to List',
@@ -44,7 +44,7 @@ class TodoDetailState extends State {
             PopupMenuButton<String>(
               onSelected: select,
               itemBuilder: (BuildContext context) {
-                return choices.map((String choice) {
+                return detailViewPopupChoices.map((String choice) {
                   return PopupMenuItem<String>(
                     value: choice,
                     child: Text(choice),
